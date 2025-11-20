@@ -45,7 +45,14 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password)
-      router.push("/dashboard")
+      
+      // Check for redirect parameter
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect')
+      if (redirectUrl) {
+        router.push(redirectUrl)
+      } else {
+        router.push("/dashboard")
+      }
     } catch (err: any) {
       setError(err.message || "Login failed")
     } finally {
@@ -128,69 +135,69 @@ export default function LoginPage() {
       {/* Main content area */}
       <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-0 md:ml-64" : "ml-0 md:ml-16"}`}>
         {/* Top header */}
-        <header className="sticky top-0 z-40 bg-card border-b border-border">
-          <div className="flex items-center justify-between px-4 py-3">
+        <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-sm border-b border-border fade-in">
+          <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3">
             <div className="flex items-center">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden text-foreground hover:bg-accent mr-2"
+                className="md:hidden text-foreground hover:bg-accent mr-2 smooth-transition p-2"
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <p className="text-2xl font-bold text-primary italic professional-heading">SymptoCare</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary italic professional-heading">SymptoCare</p>
             </div>
 
             {/* Right: Theme Switch and Auth Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="text-foreground hover:bg-accent"
+                className="text-foreground hover:bg-accent smooth-transition p-2 sm:p-2.5"
               >
-                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                {theme === "dark" ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
               </Button>
               <Link href="/auth/login">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-foreground border-border hover:bg-accent bg-transparent"
+                  className="text-foreground border-border hover:bg-accent bg-transparent smooth-transition text-xs sm:text-sm px-2 sm:px-3"
                 >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
+                  <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Login</span>
                 </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Sign Up
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale text-xs sm:text-sm px-2 sm:px-3">
+                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Sign Up</span>
                 </Button>
               </Link>
             </div>
           </div>
         </header>
 
-        <div className="min-h-[calc(100vh-64px)] bg-background flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-card border-border">
-            <CardHeader className="text-center">
+        <div className="min-h-[calc(100vh-64px)] bg-background flex items-center justify-center p-4 sm:p-6">
+          <Card className="w-full max-w-md bg-card border-border fade-in-up scale-in hover-lift smooth-transition">
+            <CardHeader className="text-center p-4 sm:p-6">
               <div className="flex items-center justify-center mb-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Shield className="h-8 w-8 text-primary" />
+                <div className="p-3 bg-primary/10 rounded-lg float-animation">
+                  <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
                 </div>
               </div>
-              <CardTitle className="text-2xl font-bold text-card-foreground">
+              <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
                 Login to SymptoCare
               </CardTitle>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground mt-2">
                 Enter your email and password to continue
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-card-foreground">
+                  <Label htmlFor="email" className="text-card-foreground text-sm sm:text-base">
                     Email Address
                   </Label>
                   <Input
@@ -199,13 +206,13 @@ export default function LoginPage() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-input border-border text-foreground"
+                    className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition focus:ring-2 focus:ring-primary"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-card-foreground">
+                  <Label htmlFor="password" className="text-card-foreground text-sm sm:text-base">
                     Password
                   </Label>
                   <Input
@@ -214,13 +221,13 @@ export default function LoginPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-input border-border text-foreground"
+                    className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition focus:ring-2 focus:ring-primary"
                     required
                   />
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
+                  <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md text-red-800 dark:text-red-200 text-sm fade-in scale-in">
                     <AlertCircle className="h-4 w-4 inline mr-2" />
                     {error}
                   </div>
@@ -229,16 +236,16 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={!email.trim() || !password.trim() || isLoading}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </form>
 
               <div className="text-center pt-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Don't have an account?{" "}
-                  <Link href="/auth/signup" className="text-primary hover:underline">
+                  <Link href="/auth/signup" className="text-primary hover:underline smooth-transition">
                     Sign up here
                   </Link>
                 </p>

@@ -11,13 +11,21 @@ export default function Dashboard() {
     const checkUserAndRedirect = async () => {
       try {
         const user = await getCurrentUser()
-        if (user) {
-          // For now, redirect all users to user dashboard
-          // In future, you can check user role/type and redirect accordingly
-          router.push("/dashboard/user")
-        } else {
-          // User not authenticated, redirect to login
+        if (!user) {
           router.push("/auth/login")
+          return
+        }
+
+        // Get user role and redirect accordingly
+        const { getCurrentUserRole } = await import("@/lib/auth")
+        const role = await getCurrentUserRole()
+        
+        if (role === 'doctor') {
+          router.push("/dashboard/doctor")
+        } else if (role === 'admin') {
+          router.push("/dashboard/admin")
+        } else {
+          router.push("/dashboard/user")
         }
       } catch (error) {
         console.error("Error checking user:", error)

@@ -261,11 +261,11 @@ export default function ProfilePage() {
   }
 
   const renderPersonalInfo = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
-        <Button variant={isEditing ? "default" : "outline"} size="sm" onClick={() => setIsEditing(!isEditing)}>
-          {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground">Personal Information</h3>
+        <Button variant={isEditing ? "default" : "outline"} size="sm" onClick={() => setIsEditing(!isEditing)} className="smooth-transition hover-scale text-xs sm:text-sm w-full sm:w-auto">
+          {isEditing ? <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />}
           {isEditing ? "Save Changes" : "Edit Profile"}
         </Button>
       </div>
@@ -331,9 +331,9 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-foreground">
+          <Label htmlFor="name" className="text-foreground text-sm sm:text-base">
             Full Name
           </Label>
           <Input
@@ -341,7 +341,7 @@ export default function ProfilePage() {
             value={profileData.name}
             onChange={(e) => updateField("name", e.target.value)}
             disabled={!isEditing}
-            className="bg-input border-border text-foreground"
+            className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
           />
         </div>
 
@@ -443,12 +443,12 @@ export default function ProfilePage() {
       </div>
 
       {isEditing && (
-        <div className="flex gap-2">
-          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Save className="h-4 w-4 mr-2" />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale w-full sm:w-auto text-sm">
+            <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
             Save Changes
           </Button>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel} className="smooth-transition w-full sm:w-auto text-sm">
             Cancel
           </Button>
         </div>
@@ -466,9 +466,9 @@ export default function ProfilePage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <div className="space-y-2">
-          <Label htmlFor="blood-group" className="text-foreground">
+          <Label htmlFor="blood-group" className="text-foreground text-sm sm:text-base">
             Blood Group
           </Label>
           <Select
@@ -767,22 +767,22 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-3">
-        {recentActivity.map((activity) => (
-          <Card key={activity.id} className="bg-accent border-border hover:bg-accent/80 transition-colors">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                {getActivityIcon(activity.type)}
+        {recentActivity.map((activity, index) => (
+          <Card key={activity.id} className="bg-accent border-border hover-lift smooth-transition fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="flex-shrink-0">{getActivityIcon(activity.type)}</div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-medium text-foreground truncate">{activity.action}</p>
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1">
+                    <p className="font-medium text-foreground truncate text-sm sm:text-base">{activity.action}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <Badge variant="secondary" className={`text-xs ${getActivityBadgeColor(activity.severity)}`}>
                         {activity.severity}
                       </Badge>
                       <p className="text-xs text-muted-foreground whitespace-nowrap">{activity.date}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">{activity.details}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{activity.details}</p>
                 </div>
               </div>
             </CardContent>
@@ -824,12 +824,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed top-4 left-4 z-40">
-        <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-border">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Heart className="h-4 w-4 text-primary-foreground" />
+      <div className="fixed top-2 sm:top-4 left-2 sm:left-4 z-40 fade-in">
+        <div className="flex items-center gap-1 sm:gap-2 bg-background/80 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-border smooth-transition hover-scale">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center">
+            <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg text-primary">SymptoCare</span>
+          <span className="font-bold text-sm sm:text-lg text-primary">SymptoCare</span>
         </div>
       </div>
 
@@ -883,7 +883,7 @@ export default function ProfilePage() {
       <Button
         variant="outline"
         size="sm"
-        className="fixed top-4 left-20 z-40 bg-background/80 backdrop-blur-sm"
+        className="fixed top-2 sm:top-4 left-16 sm:left-20 z-40 bg-background/80 backdrop-blur-sm smooth-transition hover-scale p-2"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
         <Menu className="h-4 w-4" />
@@ -893,61 +893,61 @@ export default function ProfilePage() {
       {isSidebarOpen && <div className="fixed inset-0 bg-black/20 z-20" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <div className="p-6 pt-20">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 pt-16 sm:pt-20">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-              <p className="text-muted-foreground">Manage your personal information and preferences</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Profile</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your personal information and preferences</p>
             </div>
-            <Badge variant="secondary" className="bg-primary/10 text-primary">
-              <User className="h-4 w-4 mr-2" />
+            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs sm:text-sm">
+              <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Patient Profile
             </Badge>
           </div>
 
-          <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="personal" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Personal
+          <Tabs defaultValue="personal" className="space-y-4 sm:space-y-6">
+            <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+              <TabsTrigger value="personal" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Personal</span>
               </TabsTrigger>
-              <TabsTrigger value="health" className="flex items-center gap-2">
-                <Heart className="h-4 w-4" />
-                Health
+              <TabsTrigger value="health" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Health</span>
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Preferences
+              <TabsTrigger value="preferences" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Preferences</span>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Activity
+              <TabsTrigger value="activity" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Activity</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="personal">
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">{renderPersonalInfo()}</CardContent>
+              <Card className="bg-card border-border fade-in-up hover-lift smooth-transition">
+                <CardContent className="p-4 sm:p-6">{renderPersonalInfo()}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="health">
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">{renderHealthInfo()}</CardContent>
+              <Card className="bg-card border-border fade-in-up hover-lift smooth-transition">
+                <CardContent className="p-4 sm:p-6">{renderHealthInfo()}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="preferences">
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">{renderPreferences()}</CardContent>
+              <Card className="bg-card border-border fade-in-up hover-lift smooth-transition">
+                <CardContent className="p-4 sm:p-6">{renderPreferences()}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="activity">
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">{renderActivity()}</CardContent>
+              <Card className="bg-card border-border fade-in-up hover-lift smooth-transition">
+                <CardContent className="p-4 sm:p-6">{renderActivity()}</CardContent>
               </Card>
             </TabsContent>
           </Tabs>

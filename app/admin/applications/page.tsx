@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Search,
   Eye,
@@ -19,29 +21,124 @@ import {
   Calendar,
   GraduationCap,
   Stethoscope,
+  AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
-
-interface DoctorApplication {
-  id: string
-  fullName: string
-  email: string
-  phone: string
-  specializations: string[]
-  experience: number
-  status: "pending" | "approved" | "rejected"
-  submittedAt: string
-  university: string
-  degree: string
-  licenseNumber: string
-}
+import { getCurrentUser, getCurrentUserRole } from "@/lib/auth"
+import { supabase } from "@/lib/supabase"
 
 export default function AdminApplicationsPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedApplication, setSelectedApplication] = useState<DoctorApplication | null>(null)
+  const [selectedApplication, setSelectedApplication] = useState<any>(null)
+  const [applications, setApplications] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [verificationComment, setVerificationComment] = useState("")
 
-  // Mock data
-  const applications: DoctorApplication[] = [
+  useEffect(() => {
+    const checkAdminAndLoad = async () => {
+      try {
+        const role = await getCurrentUserRole()
+        if (role !== 'admin') {
+          router.push("/dashboard")
+          return
+        }
+
+        await loadApplications()
+      } catch (error) {
+        console.error("Error:", error)
+        router.push("/auth/login")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAdminAndLoad()
+  }, [router])
+
+  const loadApplications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('doctor_applications')
+        .select(`
+          *,
+          user:profiles!doctor_applications_user_id_fkey(
+            id,
+            full_name,
+            email,
+            phone
+          ),
+          doctor:doctors!doctor_applications_doctor_id_fkey(
+            id,
+            specialization,
+            experience_years,
+            license_number,
+            location,
+            consultation_fee,
+            qualifications,
+            languages,
+            bio
+          )
+        `)
+        .order('submitted_at', { ascending: false })
+
+      if (error) throw error
+      setApplications(data || [])
+    } catch (error) {
+      console.error("Error loading applications:", error)
+    }
+  }
+
+  const handleStatusUpdate = async (applicationId: string, newStatus: "approved" | "rejected") => {
+    try {
+      const currentUser = await getCurrentUser()
+      if (!currentUser) return
+
+      // Update application status
+      const { error: appError } = await supabase
+        .from('doctor_applications')
+        .update({ status: newStatus })
+        .eq('id', applicationId)
+
+      if (appError) throw appError
+
+      // If approved, verify the doctor
+      if (newStatus === 'approved') {
+        const application = applications.find(a => a.id === applicationId)
+        if (application?.doctor?.id) {
+          const { error: doctorError } = await supabase
+            .from('doctors')
+            .update({
+              is_verified: true,
+              verified_at: new Date().toISOString(),
+              verified_by: currentUser.id,
+            })
+            .eq('id', application.doctor.id)
+
+          if (doctorError) throw doctorError
+        }
+      }
+
+      // Create approval record
+      const { error: approvalError } = await supabase
+        .from('approvals')
+        .insert({
+          application_id: applicationId,
+          approved_by: currentUser.id,
+          status: newStatus,
+          comments: verificationComment || null,
+        })
+
+      if (approvalError) throw approvalError
+
+      setVerificationComment("")
+      await loadApplications()
+      setSelectedApplication(null)
+    } catch (error: any) {
+      console.error("Error updating application:", error)
+      alert(error.message || "Failed to update application")
+    }
+  }
     {
       id: "1",
       fullName: "Dr. Sarah Johnson",
@@ -83,12 +180,16 @@ export default function AdminApplicationsPage() {
     },
   ]
 
-  const filteredApplications = applications.filter(
-    (app) =>
-      app.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.specializations.some((spec) => spec.toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+  const filteredApplications = applications.filter((app) => {
+    const name = app.user?.full_name || ""
+    const email = app.user?.email || ""
+    const specialization = app.doctor?.specialization || ""
+    const search = searchTerm.toLowerCase()
+    return name.toLowerCase().includes(search) ||
+           email.toLowerCase().includes(search) ||
+           specialization.toLowerCase().includes(search) ||
+           app.license_number?.toLowerCase().includes(search)
+  })
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,11 +204,6 @@ export default function AdminApplicationsPage() {
     }
   }
 
-  const handleStatusUpdate = (applicationId: string, newStatus: "approved" | "rejected") => {
-    // In real app, this would make an API call
-    console.log(`Updating application ${applicationId} to ${newStatus}`)
-    alert(`Application ${newStatus} successfully!`)
-  }
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -158,21 +254,21 @@ export default function AdminApplicationsPage() {
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-card-foreground">{application.fullName}</h3>
+                            <h3 className="font-semibold text-card-foreground">{application.user?.full_name || "Unknown"}</h3>
                             <Badge className={getStatusColor(application.status)}>{application.status}</Badge>
                           </div>
                           <div className="space-y-1 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                               <Mail className="h-3 w-3" />
-                              {application.email}
+                              {application.user?.email || "N/A"}
                             </div>
                             <div className="flex items-center gap-2">
                               <Stethoscope className="h-3 w-3" />
-                              {application.specializations.join(", ")}
+                              {application.doctor?.specialization || application.specialization || "N/A"}
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-3 w-3" />
-                              Submitted: {new Date(application.submittedAt).toLocaleDateString()}
+                              Submitted: {new Date(application.submitted_at).toLocaleDateString()}
                             </div>
                           </div>
                         </CardContent>
@@ -289,41 +385,57 @@ export default function AdminApplicationsPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="font-semibold text-card-foreground mb-3">{selectedApplication.fullName}</h3>
+                    <h3 className="font-semibold text-card-foreground mb-3">{selectedApplication.user?.full_name || "Unknown"}</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Mail className="h-3 w-3" />
-                        {selectedApplication.email}
+                        {selectedApplication.user?.email || "N/A"}
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Phone className="h-3 w-3" />
-                        {selectedApplication.phone}
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <GraduationCap className="h-3 w-3" />
-                        {selectedApplication.degree} - {selectedApplication.university}
+                        {selectedApplication.user?.phone || "N/A"}
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <FileText className="h-3 w-3" />
-                        License: {selectedApplication.licenseNumber}
+                        License: {selectedApplication.license_number || selectedApplication.doctor?.license_number || "N/A"}
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        {selectedApplication.experience} years experience
+                        {selectedApplication.doctor?.experience_years || selectedApplication.experience_years || 0} years experience
                       </div>
+                      {selectedApplication.doctor?.location && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Stethoscope className="h-3 w-3" />
+                          {selectedApplication.doctor.location}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-card-foreground mb-2">Specializations</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedApplication.specializations.map((spec) => (
-                        <Badge key={spec} variant="secondary" className="text-xs">
-                          {spec}
-                        </Badge>
-                      ))}
-                    </div>
+                    <h4 className="font-medium text-card-foreground mb-2">Specialization</h4>
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedApplication.doctor?.specialization || selectedApplication.specialization || "N/A"}
+                    </Badge>
                   </div>
+
+                  {selectedApplication.doctor?.qualifications && selectedApplication.doctor.qualifications.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-card-foreground mb-2">Qualifications</h4>
+                      <div className="space-y-1">
+                        {selectedApplication.doctor.qualifications.map((qual: string, idx: number) => (
+                          <div key={idx} className="text-sm text-muted-foreground">• {qual}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedApplication.doctor?.bio && (
+                    <div>
+                      <h4 className="font-medium text-card-foreground mb-2">Bio</h4>
+                      <p className="text-sm text-muted-foreground">{selectedApplication.doctor.bio}</p>
+                    </div>
+                  )}
 
                   <div>
                     <h4 className="font-medium text-card-foreground mb-2">Status</h4>
@@ -331,22 +443,33 @@ export default function AdminApplicationsPage() {
                   </div>
 
                   {selectedApplication.status === "pending" && (
-                    <div className="space-y-2">
-                      <Button
-                        onClick={() => handleStatusUpdate(selectedApplication.id, "approved")}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <Check className="h-4 w-4 mr-2" />
-                        Approve Application
-                      </Button>
-                      <Button
-                        onClick={() => handleStatusUpdate(selectedApplication.id, "rejected")}
-                        variant="destructive"
-                        className="w-full"
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Reject Application
-                      </Button>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Verification Comments (Optional)</label>
+                        <Textarea
+                          value={verificationComment}
+                          onChange={(e) => setVerificationComment(e.target.value)}
+                          placeholder="Add any comments about the verification..."
+                          className="bg-input border-border text-foreground min-h-[80px]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => handleStatusUpdate(selectedApplication.id, "approved")}
+                          className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Approve & Verify Doctor
+                        </Button>
+                        <Button
+                          onClick={() => handleStatusUpdate(selectedApplication.id, "rejected")}
+                          variant="destructive"
+                          className="w-full"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Reject Application
+                        </Button>
+                      </div>
                     </div>
                   )}
 

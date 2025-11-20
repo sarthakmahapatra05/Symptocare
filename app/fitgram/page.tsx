@@ -87,71 +87,72 @@ export default function FitGramPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/10 to-background">
       {/* Enhanced Top Navigation */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border fade-in">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsNavOpen(!isNavOpen)}
-              className="text-foreground hover:bg-accent transition-all duration-200"
+              className="text-foreground hover:bg-accent smooth-transition p-2"
             >
               {isNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
 
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-primary professional-heading">FitGram</h1>
-              <Badge variant="secondary" className="text-xs">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-primary professional-heading">FitGram</h1>
+              <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
                 Community
               </Badge>
             </div>
 
             <div
-              className={`flex items-center gap-2 transition-all duration-300 ${isNavOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}
+              className={`flex items-center gap-2 smooth-transition ${isNavOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}
             >
               <Link href="/">
-                <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent">
+                <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent smooth-transition">
                   <Home className="h-4 w-4 mr-2" />
-                  Home
+                  <span className="hidden sm:inline">Home</span>
                 </Button>
               </Link>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden md:flex bg-transparent">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="outline" size="sm" className="hidden md:flex bg-transparent smooth-transition">
               <Users className="h-4 w-4 mr-2" />
               1.2k Online
             </Button>
-            <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent smooth-transition p-2">
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Left Sidebar - Trending & Stats */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="bg-card/80 backdrop-blur-sm border-border">
-              <CardHeader className="pb-3">
-                <h3 className="font-semibold text-card-foreground flex items-center gap-2 professional-heading">
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+            <Card className="bg-card/80 backdrop-blur-sm border-border fade-in-up hover-lift smooth-transition">
+              <CardHeader className="pb-3 p-4 sm:p-6">
+                <h3 className="font-semibold text-card-foreground flex items-center gap-2 professional-heading text-sm sm:text-base">
                   <TrendingUp className="h-4 w-4 text-primary" />
                   Trending Topics
                 </h3>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 p-4 sm:p-6 pt-0">
                 {trendingTopics.map((topic, index) => (
                   <div
                     key={topic.name}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 smooth-transition cursor-pointer hover-scale"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div>
-                      <p className="font-medium text-sm professional-heading">#{topic.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-xs sm:text-sm professional-heading truncate">#{topic.name}</p>
                       <p className="text-xs text-muted-foreground">{topic.posts} posts</p>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs flex-shrink-0 ml-2">
                       {index + 1}
                     </Badge>
                   </div>
@@ -159,17 +160,17 @@ export default function FitGramPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/80 backdrop-blur-sm border-border">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto">
-                    <Activity className="h-8 w-8 text-primary" />
+            <Card className="bg-card/80 backdrop-blur-sm border-border fade-in-up hover-lift smooth-transition">
+              <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <div className="p-3 sm:p-4 bg-primary/10 rounded-full w-fit mx-auto float-animation">
+                    <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-semibold professional-heading">Your Health Journey</h4>
-                    <p className="text-sm text-muted-foreground professional-body">Track progress with the community</p>
+                    <h4 className="font-semibold professional-heading text-sm sm:text-base">Your Health Journey</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground professional-body">Track progress with the community</p>
                   </div>
-                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale text-sm">
                     <Target className="h-4 w-4 mr-2" />
                     Set Goals
                   </Button>
@@ -180,56 +181,56 @@ export default function FitGramPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm">
-                <TabsTrigger value="feed" className="professional-body">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+              <TabsList className="grid w-full grid-cols-3 bg-card/80 backdrop-blur-sm h-auto p-1">
+                <TabsTrigger value="feed" className="professional-body text-xs sm:text-sm py-2 sm:py-2.5">
                   Feed
                 </TabsTrigger>
-                <TabsTrigger value="create" className="professional-body">
+                <TabsTrigger value="create" className="professional-body text-xs sm:text-sm py-2 sm:py-2.5">
                   Create Post
                 </TabsTrigger>
-                <TabsTrigger value="community" className="professional-body">
+                <TabsTrigger value="community" className="professional-body text-xs sm:text-sm py-2 sm:py-2.5">
                   Community
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="feed" className="space-y-6">
+              <TabsContent value="feed" className="space-y-4 sm:space-y-6">
                 {/* Enhanced Create Post Section */}
-                <Card className="bg-card/80 backdrop-blur-sm border-border">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                <Card className="bg-card/80 backdrop-blur-sm border-border fade-in-up hover-lift smooth-transition">
+                  <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-xs sm:text-sm">
                           You
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 space-y-4">
+                      <div className="flex-1 space-y-3 sm:space-y-4 min-w-0">
                         <Textarea
                           placeholder="Share your health journey, fitness wins, or wellness tips with the community..."
                           value={postText}
                           onChange={(e) => setPostText(e.target.value)}
-                          className="min-h-[100px] resize-none bg-input/50 border-border text-foreground placeholder:text-muted-foreground professional-body"
+                          className="min-h-[80px] sm:min-h-[100px] resize-none bg-input/50 border-border text-foreground placeholder:text-muted-foreground professional-body text-sm sm:text-base"
                         />
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={handleImageUpload} className="bg-transparent">
-                              <ImageIcon className="h-4 w-4 mr-2" />
-                              Photo
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
+                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <Button variant="outline" size="sm" onClick={handleImageUpload} className="bg-transparent smooth-transition hover-scale text-xs sm:text-sm px-2 sm:px-3">
+                              <ImageIcon className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Photo</span>
                             </Button>
-                            <Button variant="outline" size="sm" className="bg-transparent">
-                              <Video className="h-4 w-4 mr-2" />
-                              Video
+                            <Button variant="outline" size="sm" className="bg-transparent smooth-transition hover-scale text-xs sm:text-sm px-2 sm:px-3">
+                              <Video className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Video</span>
                             </Button>
-                            <Button variant="outline" size="sm" className="bg-transparent">
-                              <Smile className="h-4 w-4 mr-2" />
-                              Mood
+                            <Button variant="outline" size="sm" className="bg-transparent smooth-transition hover-scale text-xs sm:text-sm px-2 sm:px-3">
+                              <Smile className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Mood</span>
                             </Button>
                           </div>
                           <Button
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale text-xs sm:text-sm px-3 sm:px-4"
                             disabled={!postText.trim()}
                           >
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                             Share
                           </Button>
                         </div>
@@ -246,38 +247,39 @@ export default function FitGramPage() {
                 </Card>
 
                 {/* Enhanced Social Feed */}
-                <div className="space-y-6">
-                  {posts.map((post) => (
+                <div className="space-y-4 sm:space-y-6">
+                  {posts.map((post, index) => (
                     <Card
                       key={post.id}
-                      className="bg-card/80 backdrop-blur-sm border-border hover:shadow-lg transition-all duration-300"
+                      className="bg-card/80 backdrop-blur-sm border-border hover-lift smooth-transition fade-in-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <CardHeader className="pb-4">
+                      <CardHeader className="pb-3 sm:pb-4 p-4 sm:p-6">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-12 w-12">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                               <AvatarImage src={post.user.avatar || "/placeholder.svg"} alt={post.user.name} />
-                              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                              <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-xs sm:text-sm">
                                 {post.user.initials}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-semibold text-card-foreground professional-heading">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <p className="font-semibold text-card-foreground professional-heading text-sm sm:text-base truncate">
                                   {post.user.name}
                                 </p>
-                                {post.user.verified && <Award className="h-4 w-4 text-primary" />}
+                                {post.user.verified && <Award className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />}
                               </div>
-                              <p className="text-sm text-muted-foreground professional-body">{post.timeAgo}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground professional-body">{post.timeAgo}</p>
                             </div>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0 space-y-4">
-                        <p className="text-card-foreground leading-relaxed professional-body">{post.content}</p>
+                      <CardContent className="pt-0 space-y-3 sm:space-y-4 p-4 sm:p-6">
+                        <p className="text-card-foreground leading-relaxed professional-body text-sm sm:text-base">{post.content}</p>
 
                         {post.tags && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {post.tags.map((tag) => (
                               <Badge key={tag} variant="secondary" className="text-xs">
                                 {tag}
@@ -291,36 +293,36 @@ export default function FitGramPage() {
                             <img
                               src={post.image || "/placeholder.svg"}
                               alt="Post content"
-                              className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+                              className="w-full h-48 sm:h-64 object-cover hover-scale smooth-transition"
                             />
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                          <div className="flex items-center gap-6">
+                        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-border">
+                          <div className="flex items-center gap-3 sm:gap-6">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-red-500 transition-colors"
+                              className="text-muted-foreground hover:text-red-500 smooth-transition text-xs sm:text-sm px-2 sm:px-3"
                             >
-                              <Heart className="h-5 w-5 mr-2" />
-                              {post.likes}
+                              <Heart className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                              <span className="hidden sm:inline">{post.likes}</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-primary transition-colors"
+                              className="text-muted-foreground hover:text-primary smooth-transition text-xs sm:text-sm px-2 sm:px-3"
                             >
-                              <MessageCircle className="h-5 w-5 mr-2" />
-                              {post.comments}
+                              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                              <span className="hidden sm:inline">{post.comments}</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-primary transition-colors"
+                              className="text-muted-foreground hover:text-primary smooth-transition text-xs sm:text-sm px-2 sm:px-3"
                             >
-                              <Share2 className="h-5 w-5 mr-2" />
-                              {post.shares}
+                              <Share2 className="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" />
+                              <span className="hidden sm:inline">{post.shares}</span>
                             </Button>
                           </div>
                         </div>

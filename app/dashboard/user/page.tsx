@@ -1,28 +1,67 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { User, Stethoscope, Clock, Heart, Activity, Calendar, AlertCircle, CheckCircle, TrendingUp, LogOut } from "lucide-react"
-import { signOut } from "@/lib/auth"
+import { User, Stethoscope, Clock, Heart, Activity, Calendar, AlertCircle, CheckCircle, TrendingUp, LogOut, MapPin, Video, Phone } from "lucide-react"
+import { signOut, getCurrentUser } from "@/lib/auth"
+import { supabase } from "@/lib/supabase"
+import Link from "next/link"
 
 export default function UserDashboard() {
   const router = useRouter()
   const [symptomText, setSymptomText] = useState("")
-  const [recentSymptoms] = useState([
-    { id: 1, symptoms: "Headache, fatigue", date: "2024-01-15", status: "analyzed" },
-    { id: 2, symptoms: "Cough, fever", date: "2024-01-10", status: "pending" },
-    { id: 3, symptoms: "Stomach pain", date: "2024-01-05", status: "completed" },
-  ])
+  const [appointments, setAppointments] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const currentUser = await getCurrentUser()
+        if (!currentUser) {
+          router.push("/auth/login")
+          return
+        }
+
+        setUser(currentUser)
+
+        // Fetch appointments from database
+        const { data: appointmentsData, error } = await supabase
+          .from('appointments')
+          .select(`
+            *,
+            doctor:doctors!appointments_doctor_id_fkey(
+              id,
+              specialization,
+              consultation_fee,
+              location,
+              profiles:profiles!doctors_id_fkey(full_name, email)
+            )
+          `)
+          .eq('patient_id', currentUser.id)
+          .order('scheduled_at', { ascending: false })
+          .limit(10)
+
+        if (error) throw error
+        setAppointments(appointmentsData || [])
+      } catch (error) {
+        console.error("Error loading appointments:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [router])
 
   const analyzeSymptoms = () => {
     if (!symptomText.trim()) return
-    console.log(`[v0] Analyzing symptoms: ${symptomText}`)
-    // In real app, this would call the symptom analysis API
+    router.push("/")
   }
 
   const handleLogout = async () => {
@@ -31,6 +70,34 @@ export default function UserDashboard() {
       router.push("/auth/login")
     } catch (error) {
       console.error("Logout failed:", error)
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "scheduled":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+      case "confirmed":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+      case "completed":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+      case "cancelled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "video":
+        return <Video className="h-4 w-4" />
+      case "phone":
+        return <Phone className="h-4 w-4" />
+      case "in-person":
+        return <User className="h-4 w-4" />
+      default:
+        return <User className="h-4 w-4" />
     }
   }
 
@@ -56,58 +123,66 @@ export default function UserDashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-card border-border hover-lift smooth-transition">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
-                  <Stethoscope className="h-5 w-5 text-primary" />
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Checks</p>
-                  <p className="text-2xl font-bold text-foreground">12</p>
+                  <p className="text-sm text-muted-foreground">Total Appointments</p>
+                  <p className="text-2xl font-bold text-foreground">{appointments.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border hover-lift smooth-transition">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Upcoming</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {appointments.filter(a => a.status === 'scheduled' || a.status === 'confirmed').length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border hover-lift smooth-transition">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Resolved</p>
-                  <p className="text-2xl font-bold text-foreground">8</p>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {appointments.filter(a => a.status === 'completed').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border hover-lift smooth-transition">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Clock className="h-5 w-5 text-orange-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Stethoscope className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-foreground">3</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Health Score</p>
-                  <p className="text-2xl font-bold text-foreground">85%</p>
+                  <p className="text-sm text-muted-foreground">Quick Check</p>
+                  <Link href="/">
+                    <Button size="sm" variant="ghost" className="mt-1 text-primary hover:text-primary/80">
+                      Start
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -141,42 +216,77 @@ export default function UserDashboard() {
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
-          <Card className="bg-card border-border">
+          {/* Recent Appointments */}
+          <Card className="bg-card border-border hover-lift smooth-transition">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-card-foreground">
-                <Activity className="h-5 w-5 text-primary" />
-                Recent Symptom Checks
+              <CardTitle className="flex items-center justify-between text-card-foreground">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  My Appointments
+                </div>
+                <Link href="/appointments">
+                  <Button size="sm" variant="outline">View All</Button>
+                </Link>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentSymptoms.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-accent rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{item.symptoms}</p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {item.date}
-                      </p>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-muted-foreground mt-2">Loading appointments...</p>
+                </div>
+              ) : appointments.length === 0 ? (
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">No appointments yet</p>
+                  <Link href="/doctors">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                      Book Appointment
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {appointments.map((appointment) => (
+                    <div key={appointment.id} className="p-3 bg-accent rounded-lg hover-lift smooth-transition">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">
+                            {appointment.doctor?.profiles?.full_name || "Dr. Unknown"}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{appointment.doctor?.specialization}</p>
+                        </div>
+                        <Badge className={getStatusColor(appointment.status)}>
+                          {appointment.status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(appointment.scheduled_at).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(appointment.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {getTypeIcon(appointment.consultation_type)}
+                          {appointment.consultation_type}
+                        </div>
+                        {appointment.doctor?.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {appointment.doctor.location}
+                          </div>
+                        )}
+                      </div>
+                      {appointment.reason && (
+                        <p className="text-xs text-muted-foreground mt-2">{appointment.reason}</p>
+                      )}
                     </div>
-                    <Badge
-                      variant={
-                        item.status === "completed" ? "default" : item.status === "analyzed" ? "secondary" : "outline"
-                      }
-                      className={
-                        item.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : item.status === "analyzed"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-orange-100 text-orange-800"
-                      }
-                    >
-                      {item.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
