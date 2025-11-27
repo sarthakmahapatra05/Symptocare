@@ -66,3 +66,95 @@ export async function getProfile(userId: string) {
   if (error) throw error
   return data
 }
+
+export async function signUpDoctor(email: string, password: string, doctorData: any) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (error) throw error
+
+  if (data.user) {
+    // Create profile with doctor role
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        email,
+        full_name: doctorData.name,
+        phone: doctorData.phone,
+        role: 'doctor',
+      })
+
+    if (profileError) throw profileError
+
+    // Create doctor application
+    const { error: applicationError } = await supabase
+      .from('doctor_applications')
+      .insert({
+        user_id: data.user.id,
+        license_number: doctorData.licenseNumber,
+        specialization: doctorData.specialization,
+        experience_years: doctorData.experienceYears,
+        documents: doctorData.documents || [],
+        status: 'pending',
+      })
+
+    if (applicationError) throw applicationError
+
+    // Create doctor record (unverified)
+    const { error: doctorError } = await supabase
+      .from('doctors')
+      .insert({
+        id: data.user.id,
+        license_number: doctorData.licenseNumber,
+        specialization: doctorData.specialization,
+        experience_years: doctorData.experienceYears,
+        qualifications: doctorData.qualifications || [],
+        languages: doctorData.languages || [],
+        consultation_fee: doctorData.consultationFee,
+        location: doctorData.location,
+        address: doctorData.address,
+        phone: doctorData.phone,
+        email: email,
+        bio: doctorData.bio || '',
+        availability: doctorData.availability || {},
+        is_verified: false,
+      })
+
+    if (doctorError) throw doctorError
+  }
+
+  return data
+}
+
+export async function getCurrentUserRole() {
+  const user = await getCurrentUser()
+  if (!user) return null
+
+  const profile = await getProfile(user.id)
+  return profile?.role || 'user'
+}
+
+export async function getDoctorProfile(doctorId: string) {
+  const { data, error } = await supabase
+    .from('doctors')
+    .select('*, profiles(*)')
+    .eq('id', doctorId)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function isDoctorVerified(doctorId: string) {
+  const { data, error } = await supabase
+    .from('doctors')
+    .select('is_verified')
+    .eq('id', doctorId)
+    .single()
+
+  if (error) return false
+  return data?.is_verified || false
+}
