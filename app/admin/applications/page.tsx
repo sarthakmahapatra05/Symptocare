@@ -139,46 +139,6 @@ export default function AdminApplicationsPage() {
       alert(error.message || "Failed to update application")
     }
   }
-    {
-      id: "1",
-      fullName: "Dr. Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "+91 9876543210",
-      specializations: ["Cardiology", "General Medicine"],
-      experience: 8,
-      status: "pending",
-      submittedAt: "2024-01-15",
-      university: "AIIMS Delhi",
-      degree: "MD",
-      licenseNumber: "MH12345",
-    },
-    {
-      id: "2",
-      fullName: "Dr. Rajesh Kumar",
-      email: "rajesh.kumar@email.com",
-      phone: "+91 9876543211",
-      specializations: ["Neurology"],
-      experience: 12,
-      status: "approved",
-      submittedAt: "2024-01-10",
-      university: "PGI Chandigarh",
-      degree: "DM",
-      licenseNumber: "DL67890",
-    },
-    {
-      id: "3",
-      fullName: "Dr. Priya Sharma",
-      email: "priya.sharma@email.com",
-      phone: "+91 9876543212",
-      specializations: ["Pediatrics", "General Medicine"],
-      experience: 5,
-      status: "rejected",
-      submittedAt: "2024-01-08",
-      university: "KEM Hospital Mumbai",
-      degree: "MBBS",
-      licenseNumber: "MH54321",
-    },
-  ]
 
   const filteredApplications = applications.filter((app) => {
     const name = app.user?.full_name || ""
