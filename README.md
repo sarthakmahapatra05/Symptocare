@@ -1,4 +1,5 @@
 # Symptocare 🏥
+<img src="./logosymptocare.png" alt="Header Banner" width="100%" />
 
 [![HackOdisha5.0](https://img.shields.io/badge/Hackathon-HackOdisha5.0-blue)](https://hackodisha.com)
 [![Team Alpha](https://img.shields.io/badge/Team-Alpha-green)](https://github.com/team-alpha)
