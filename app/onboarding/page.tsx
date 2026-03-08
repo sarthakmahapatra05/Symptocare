@@ -82,7 +82,7 @@ export default function OnboardingPage() {
 
       // Update profile in profiles table
       const { error } = await supabase.from("profiles").update({
-        name: onboardingData.name,
+        full_name: onboardingData.name,
         age: parseInt(onboardingData.age) || null,
         gender: onboardingData.gender,
         location: onboardingData.location,

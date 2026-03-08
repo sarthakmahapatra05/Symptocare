@@ -36,6 +36,7 @@ A comprehensive healthcare platform built during **HackOdisha5.0** hackathon by 
 
 - Node.js 18+
 - pnpm (recommended) or npm
+- Python 3.8+ (for ML service)
 - Docker & Docker Compose (optional, for containerized development)
 
 ### Local Development
@@ -61,6 +62,7 @@ A comprehensive healthcare platform built during **HackOdisha5.0** hackathon by 
 
 4. **Access the application**
    - Frontend: http://localhost:3000
+   - ML Service: http://localhost:5000
    - Supabase: http://localhost:5432
 
 #### Option 2: Traditional Development
@@ -133,7 +135,16 @@ HackOdisha5.0/
 ├── components/            # Reusable UI components
 ├── lib/                   # Utility functions
 │   ├── auth.ts           # Authentication helpers
-│   └── supabase.ts       # Supabase client
+│   ├── supabase.ts       # Supabase client
+│   └── questionnaire-questions.ts  # Predefined questions
+├── ml-service/           # ML service (Python Flask)
+│   ├── app.py           # Flask API
+│   ├── models/          # ML models
+│   ├── train_models.py  # Training script
+│   └── requirements.txt # Python dependencies
+├── app/api/             # Next.js API routes
+│   ├── analyze-symptoms/  # Symptom analysis endpoint
+│   └── recommend-doctor/ # Doctor recommendation endpoint
 ├── public/               # Static assets
 ├── styles/               # Global styles
 ├── Dockerfile           # Docker configuration
@@ -149,6 +160,7 @@ Create a `.env.local` file with the following variables:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+ML_SERVICE_URL=http://localhost:5000
 ```
 
 ## 🛠️ Tech Stack
@@ -157,7 +169,8 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 - **Styling**: Tailwind CSS, shadcn/ui
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **AI Integration**: Custom ML models for symptom analysis
+- **AI Integration**: Custom ML models for symptom analysis (see [ML_IMPLEMENTATION.md](ML_IMPLEMENTATION.md))
+- **ML Service**: Python Flask API with scikit-learn models
 - **Deployment**: Docker, Vercel
 - **Package Manager**: pnpm
 
@@ -170,10 +183,27 @@ pnpm build        # Build for production
 pnpm start        # Start production server
 pnpm lint         # Run ESLint
 
+# ML Service
+cd ml-service
+python train_models.py  # Train ML models
+python app.py           # Start ML service
+
 # Database
 pnpm db:push      # Push schema changes to Supabase
 pnpm db:studio    # Open Supabase Studio
 ```
+
+## 🤖 ML Service Setup
+
+The application uses custom ML models for symptom analysis instead of external APIs. See [SETUP_ML.md](SETUP_ML.md) for detailed setup instructions.
+
+Quick setup:
+1. Install Python dependencies: `cd ml-service && pip install -r requirements.txt`
+2. Train models: `python train_models.py` (optional - uses synthetic data if Kaggle not configured)
+3. Start ML service: `python app.py`
+4. Configure Next.js: Add `ML_SERVICE_URL=http://localhost:5000` to `.env.local`
+
+For Kaggle dataset integration, see [SETUP_ML.md](SETUP_ML.md).
 
 ## 🤝 Contributing
 

@@ -38,6 +38,7 @@ import Link from "next/link"
 import { useParams, useSearchParams } from "next/navigation"
 
 interface SeverityData {
+  [key: string]: string | number
   name: string
   value: number
   color: string

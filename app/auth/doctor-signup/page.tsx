@@ -1,17 +1,18 @@
 "use client"
 
+import Image from "next/image"
+import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { User, Shield, AlertCircle, Menu, X, Home, Users, FileText, Phone, LogIn, UserPlus, Moon, Sun, Stethoscope } from "lucide-react"
-import Link from "next/link"
+import { AlertCircle, ClipboardCheck, ShieldCheck, Stethoscope } from "lucide-react"
 import { signUpDoctor } from "@/lib/auth"
-import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
 
 export default function DoctorSignupPage() {
   const [formData, setFormData] = useState({
@@ -32,9 +33,8 @@ export default function DoctorSignupPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [languagesInput, setLanguagesInput] = useState("")
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
 
   const specializations = [
     "General Physician",
@@ -58,7 +58,6 @@ export default function DoctorSignupPage() {
     e.preventDefault()
     setError("")
 
-    // Validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError("Please fill in all required fields")
       return
@@ -82,22 +81,29 @@ export default function DoctorSignupPage() {
     setIsLoading(true)
 
     try {
+      const languages = languagesInput
+        .split(",")
+        .map((language) => language.trim())
+        .filter((language) => language.length > 0)
+
       await signUpDoctor(formData.email, formData.password, {
         name: formData.name,
         phone: formData.phone,
         licenseNumber: formData.licenseNumber,
         specialization: formData.specialization,
-        experienceYears: parseInt(formData.experienceYears) || 0,
-        consultationFee: parseFloat(formData.consultationFee) || 0,
+        experienceYears: Number.parseInt(formData.experienceYears) || 0,
+        consultationFee: Number.parseFloat(formData.consultationFee) || 0,
         location: formData.location,
         address: formData.address,
-        qualifications: formData.qualifications.split(',').map(q => q.trim()).filter(q => q),
-        languages: formData.languages,
+        qualifications: formData.qualifications
+          .split(",")
+          .map((qualification) => qualification.trim())
+          .filter((qualification) => qualification.length > 0),
+        languages,
         bio: formData.bio,
         availability: {},
       })
 
-      // Redirect to a pending verification page
       router.push("/doctor/apply?status=pending")
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.")
@@ -106,217 +112,105 @@ export default function DoctorSignupPage() {
     }
   }
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
-    <div className="min-h-screen bg-background flex" suppressHydrationWarning>
-      {/* Mobile Overlay Sidebar */}
-      <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${
-          isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setIsSidebarOpen(false)}
-      />
-
-      <div
-        className={`fixed left-0 top-0 h-full bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 ${
-          isSidebarOpen ? "w-64" : "w-0 md:w-16"
-        }`}
-      >
-        <div className="p-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            {isSidebarOpen && <span className="ml-2">Menu</span>}
-          </Button>
-        </div>
-
-        <nav className="px-4 space-y-2">
-          <Link href="/">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-sidebar-primary hover:bg-sidebar-accent"
-            >
-              <Home className="h-4 w-4" />
-              {isSidebarOpen && <span className="ml-2">Home</span>}
-            </Button>
-          </Link>
-        </nav>
-      </div>
-
-      {/* Main content area */}
-      <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-0 md:ml-64" : "ml-0 md:ml-16"}`}>
-        {/* Top header */}
-        <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-sm border-b border-border fade-in">
-          <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden text-foreground hover:bg-accent smooth-transition p-2 flex-shrink-0"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              <p className="text-xl sm:text-2xl font-bold text-primary italic professional-heading">SymptoCare</p>
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 md:py-12">
+      <div className="grid items-start gap-6 md:grid-cols-[0.9fr_1.1fr]">
+        <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.45 }}>
+          <Card className="glass-panel overflow-hidden">
+            <div className="relative h-72">
+              <Image src="/doctorsection.avif" alt="Doctor onboarding" fill className="object-cover" sizes="(max-width:768px) 100vw, 45vw" />
             </div>
-
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="text-foreground hover:bg-accent smooth-transition p-2 sm:p-2.5"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
-              </Button>
-              <Link href="/auth/login">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-foreground border-border hover:bg-accent bg-transparent smooth-transition text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Login</span>
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale text-xs sm:text-sm px-2 sm:px-3">
-                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Patient Signup</span>
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        <div className="min-h-[calc(100vh-64px)] bg-background flex items-center justify-center p-4 sm:p-6">
-          <Card className="w-full max-w-3xl bg-card border-border fade-in-up scale-in hover-lift smooth-transition">
-            <CardHeader className="text-center p-4 sm:p-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="p-3 bg-primary/10 rounded-lg float-animation">
-                  <Stethoscope className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-                </div>
+            <CardContent className="p-6">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-teal-700/20 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-900">
+                <ClipboardCheck className="h-3.5 w-3.5" />
+                Verified doctor onboarding
               </div>
-              <CardTitle className="text-xl sm:text-2xl font-bold text-card-foreground">
+              <p className="text-2xl font-semibold text-slate-900">Join the SymptoCare doctor network</p>
+              <p className="mt-2 text-slate-600">
+                Create your professional profile, verify credentials, and connect with patients who need specialized care.
+              </p>
+              <div className="mt-4 flex items-center gap-2 text-sm text-cyan-800">
+                <ShieldCheck className="h-4 w-4" />
+                Credential checks are completed before account activation
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.45 }}>
+          <Card className="glass-panel">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl text-slate-900">
+                <Stethoscope className="h-6 w-6 text-teal-700" />
                 Doctor Registration
               </CardTitle>
-              <p className="text-sm sm:text-base text-muted-foreground mt-2">
-                Register as a healthcare professional. Your application will be reviewed by our admin team.
+              <p className="text-sm text-slate-600">
+                Submit your details for verification. Approved doctors get access to the doctor dashboard.
               </p>
             </CardHeader>
-            <CardContent className="space-y-4 p-4 sm:p-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Personal Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-card-foreground">Personal Information</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <section className="space-y-4">
+                  <p className="text-base font-semibold text-slate-900">Personal Information</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-card-foreground text-sm sm:text-base">
-                        Full Name *
-                      </Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => updateField("name", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
-                        required
-                      />
+                      <Label htmlFor="name">Full Name *</Label>
+                      <Input id="name" value={formData.name} onChange={(e) => updateField("name", e.target.value)} className="bg-white/80" required />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-card-foreground text-sm sm:text-base">
-                        Email Address *
-                      </Label>
+                      <Label htmlFor="email">Email Address *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) => updateField("email", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-card-foreground text-sm sm:text-base">
-                        Phone Number *
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => updateField("phone", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
-                        required
-                      />
+                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Input id="phone" type="tel" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className="bg-white/80" required />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="location" className="text-card-foreground text-sm sm:text-base">
-                        Location/City *
-                      </Label>
+                      <Label htmlFor="location">Location/City *</Label>
                       <Input
                         id="location"
                         value={formData.location}
                         onChange={(e) => updateField("location", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
                       />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="address" className="text-card-foreground text-sm sm:text-base">
-                      Full Address *
-                    </Label>
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => updateField("address", e.target.value)}
-                      className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition min-h-[80px]"
-                      required
-                    />
+                    <Label htmlFor="address">Full Address *</Label>
+                    <Textarea id="address" value={formData.address} onChange={(e) => updateField("address", e.target.value)} className="min-h-20 bg-white/80" required />
                   </div>
-                </div>
+                </section>
 
-                {/* Professional Information */}
-                <div className="space-y-4 pt-4 border-t border-border">
-                  <h3 className="text-lg font-semibold text-card-foreground">Professional Information</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section className="space-y-4 border-t border-slate-200 pt-5">
+                  <p className="text-base font-semibold text-slate-900">Professional Information</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="licenseNumber" className="text-card-foreground text-sm sm:text-base">
-                        Medical License Number *
-                      </Label>
+                      <Label htmlFor="licenseNumber">Medical License Number *</Label>
                       <Input
                         id="licenseNumber"
                         value={formData.licenseNumber}
                         onChange={(e) => updateField("licenseNumber", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
                         placeholder="e.g., MCI-12345"
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="specialization" className="text-card-foreground text-sm sm:text-base">
-                        Specialization *
-                      </Label>
-                      <Select
-                        value={formData.specialization}
-                        onValueChange={(value) => updateField("specialization", value)}
-                        required
-                      >
-                        <SelectTrigger className="bg-input border-border text-foreground">
+                      <Label htmlFor="specialization">Specialization *</Label>
+                      <Select value={formData.specialization} onValueChange={(value) => updateField("specialization", value)} required>
+                        <SelectTrigger id="specialization" className="bg-white/80">
                           <SelectValue placeholder="Select specialization" />
                         </SelectTrigger>
                         <SelectContent>
@@ -328,144 +222,128 @@ export default function DoctorSignupPage() {
                         </SelectContent>
                       </Select>
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="experienceYears" className="text-card-foreground text-sm sm:text-base">
-                        Years of Experience *
-                      </Label>
+                      <Label htmlFor="experienceYears">Years of Experience *</Label>
                       <Input
                         id="experienceYears"
                         type="number"
+                        min="0"
                         value={formData.experienceYears}
                         onChange={(e) => updateField("experienceYears", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
-                        min="0"
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="consultationFee" className="text-card-foreground text-sm sm:text-base">
-                        Consultation Fee (₹) *
-                      </Label>
+                      <Label htmlFor="consultationFee">Consultation Fee (INR) *</Label>
                       <Input
                         id="consultationFee"
                         type="number"
+                        min="0"
                         value={formData.consultationFee}
                         onChange={(e) => updateField("consultationFee", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
-                        min="0"
                       />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="qualifications" className="text-card-foreground text-sm sm:text-base">
-                      Qualifications (comma-separated) *
-                    </Label>
+                    <Label htmlFor="qualifications">Qualifications (comma-separated) *</Label>
                     <Input
                       id="qualifications"
                       value={formData.qualifications}
                       onChange={(e) => updateField("qualifications", e.target.value)}
-                      className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                      className="bg-white/80"
                       placeholder="e.g., MBBS, MD, DM"
                       required
                     />
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="bio" className="text-card-foreground text-sm sm:text-base">
-                      Professional Bio
-                    </Label>
+                    <Label htmlFor="languages">Languages (comma-separated)</Label>
+                    <Input
+                      id="languages"
+                      value={languagesInput}
+                      onChange={(e) => setLanguagesInput(e.target.value)}
+                      className="bg-white/80"
+                      placeholder="e.g., English, Hindi, Bengali"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Professional Bio</Label>
                     <Textarea
                       id="bio"
                       value={formData.bio}
                       onChange={(e) => updateField("bio", e.target.value)}
-                      className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition min-h-[100px]"
-                      placeholder="Tell us about your professional background..."
+                      className="min-h-24 bg-white/80"
+                      placeholder="Briefly describe your experience and clinical focus..."
                     />
                   </div>
-                </div>
+                </section>
 
-                {/* Account Security */}
-                <div className="space-y-4 pt-4 border-t border-border">
-                  <h3 className="text-lg font-semibold text-card-foreground">Account Security</h3>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section className="space-y-4 border-t border-slate-200 pt-5">
+                  <p className="text-base font-semibold text-slate-900">Account Security</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="password" className="text-card-foreground text-sm sm:text-base">
-                        Password *
-                      </Label>
+                      <Label htmlFor="password">Password *</Label>
                       <Input
                         id="password"
                         type="password"
+                        minLength={6}
                         value={formData.password}
                         onChange={(e) => updateField("password", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
-                        minLength={6}
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-card-foreground text-sm sm:text-base">
-                        Confirm Password *
-                      </Label>
+                      <Label htmlFor="confirmPassword">Confirm Password *</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
+                        minLength={6}
                         value={formData.confirmPassword}
                         onChange={(e) => updateField("confirmPassword", e.target.value)}
-                        className="bg-input border-border text-foreground text-sm sm:text-base smooth-transition"
+                        className="bg-white/80"
                         required
-                        minLength={6}
                       />
                     </div>
                   </div>
-                </div>
+                </section>
 
-                {error && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md text-red-800 dark:text-red-200 text-sm fade-in scale-in">
-                    <AlertCircle className="h-4 w-4 inline mr-2" />
+                {error ? (
+                  <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                    <AlertCircle className="mr-2 inline h-4 w-4" />
                     {error}
                   </div>
-                )}
+                ) : null}
 
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
-                  <p className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>Note:</strong> Your registration will be reviewed by our admin team. You will receive access to the platform once your license and credentials are verified. This process typically takes 24-48 hours.
-                  </p>
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  Your registration is reviewed by the admin team before profile activation. Typical verification time is 24-48 hours.
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 smooth-transition hover-scale disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <Button type="submit" disabled={isLoading} className="w-full bg-slate-900 text-white hover:bg-slate-800">
                   {isLoading ? "Registering..." : "Register as Doctor"}
                 </Button>
               </form>
 
-              <div className="text-center pt-4">
-                <p className="text-xs sm:text-sm text-muted-foreground">
+              <div className="mt-4 space-y-1 text-sm text-slate-600">
+                <p>
                   Already have an account?{" "}
-                  <Link href="/auth/login" className="text-primary hover:underline smooth-transition">
-                    Login here
+                  <Link href="/auth/login" className="font-medium text-teal-700 hover:underline">
+                    Login
                   </Link>
                 </p>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                  Are you a patient?{" "}
-                  <Link href="/auth/signup" className="text-primary hover:underline smooth-transition">
-                    Sign up as patient
+                <p>
+                  Signing up as patient?{" "}
+                  <Link href="/auth/signup" className="font-medium text-teal-700 hover:underline">
+                    Create patient account
                   </Link>
                 </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </main>
   )
 }
-

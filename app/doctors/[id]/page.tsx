@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator"
 import {
   MapPin,
   Clock,
-  Star,
   User,
   ArrowLeft,
   Calendar,
@@ -20,9 +19,9 @@ import {
   CheckCircle,
   DollarSign,
   Users,
+  AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 
 export default function DoctorDetailPage() {
   const params = useParams()
@@ -134,13 +133,7 @@ export default function DoctorDetailPage() {
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <div className="flex-shrink-0 mx-auto sm:mx-0">
                     <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center border-4 border-primary/20 float-animation">
-                      <Image
-                        src={doctor.image}
-                        alt={doctor.name}
-                        width={160}
-                        height={160}
-                        className="object-cover w-full h-full"
-                      />
+                      <User className="h-14 w-14 text-primary" />
                     </div>
                   </div>
                   <div className="flex-1 text-center sm:text-left">
@@ -241,7 +234,7 @@ export default function DoctorDetailPage() {
                     Consultation Fee
                   </h3>
                 </div>
-                <p className="text-3xl sm:text-4xl font-bold text-primary">₹{doctor.consultation_fee || 0}</p>
+                <p className="text-3xl sm:text-4xl font-bold text-primary">INR {doctor.consultation_fee || 0}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground">per consultation</p>
               </CardHeader>
               <Separator />

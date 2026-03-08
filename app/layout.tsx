@@ -5,6 +5,7 @@ import { Source_Sans_3 } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SiteShell } from "@/components/site-shell"
 import { Suspense } from "react"
 
 const outfit = Outfit({
@@ -22,10 +23,19 @@ const sourceSans = Source_Sans_3({
 })
 
 export const metadata: Metadata = {
-  title: "SymptoCare - Your symptoms, our care!",
+  title: {
+    default: "SymptoCare",
+    template: "%s | SymptoCare",
+  },
   description: "AI-powered healthcare assistance for symptom checking and medical guidance",
   generator: "v0.app",
-  viewport: "width=device-width, initial-scale=1",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 }
 
 export default function RootLayout({
@@ -38,7 +48,7 @@ export default function RootLayout({
       <body className={`font-sans ${outfit.variable} ${sourceSans.variable}`}>
         <Suspense fallback={null}>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-            {children}
+            <SiteShell>{children}</SiteShell>
           </ThemeProvider>
           <Analytics />
         </Suspense>

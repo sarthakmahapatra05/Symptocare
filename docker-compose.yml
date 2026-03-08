@@ -1,23 +1,33 @@
 version: '3.8'
 
 services:
+  # ML Service
+  ml-service:
+    build: ./ml-service
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - FLASK_ENV=production
+    volumes:
+      - ./ml-service/models:/app/models
+      - ./ml-service/data:/app/data
+    command: gunicorn -w 4 -b 0.0.0.0:5000 app:app
+
   # Next.js Application
   app:
     build: .
     ports:
-      - "3000:3000"      # ...existing code...
-      services:
-        app:
-          # ...existing code...
-          environment:
-            - NEXT_PUBLIC_SUPABASE_URL=https://mnicqwxceoxwwuehzibw.supabase.co
-            - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uaWNxd3hjZW94d3d1ZWh6aWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMzcyOTAsImV4cCI6MjA3MjcxMzI5MH0.rObphOWjeznqFaGiGerOxM9DMYohuWyOGUSkgQp6uGs
-      # ...existing code...
+      - "3000:3000"
     env_file:
       - .env.local
     environment:
       - NODE_ENV=production
+      - ML_SERVICE_URL=http://ml-service:5000
+      - NEXT_PUBLIC_SUPABASE_URL=https://mnicqwxceoxwwuehzibw.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uaWNxd3hjZW94d3d1ZWh6aWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMzcyOTAsImV4cCI6MjA3MjcxMzI5MH0.rObphOWjeznqFaGiGerOxM9DMYohuWyOGUSkgQp6uGs
     depends_on:
+      - ml-service
       - supabase
     volumes:
       - .:/app

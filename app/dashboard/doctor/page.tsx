@@ -1,14 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Stethoscope, Calendar, Clock, Users, LogOut, AlertCircle, CheckCircle, User, Video, Phone, MapPin } from "lucide-react"
+import { AlertCircle, Calendar, CheckCircle, Clock, LogOut, Phone, Stethoscope, User, Users, Video } from "lucide-react"
 import { signOut, getCurrentUser, getDoctorProfile } from "@/lib/auth"
 import { supabase } from "@/lib/supabase"
-import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function DoctorDashboard() {
   const router = useRouter()
@@ -25,21 +24,14 @@ export default function DoctorDashboard() {
           router.push("/auth/login")
           return
         }
-
         setUser(currentUser)
 
-        // Check if doctor is verified
         const doctorData = await getDoctorProfile(currentUser.id)
         setDoctor(doctorData)
+        if (!doctorData?.is_verified) return
 
-        if (!doctorData?.is_verified) {
-          // Doctor not verified, show pending message
-          return
-        }
-
-        // Fetch appointments from database
-        const { data: appointmentsData, error } = await supabase
-          .from('appointments')
+        const { data, error } = await supabase
+          .from("appointments")
           .select(`
             *,
             patient:profiles!appointments_patient_id_fkey(
@@ -47,312 +39,161 @@ export default function DoctorDashboard() {
               full_name,
               email,
               phone,
-              date_of_birth,
               gender
             )
           `)
-          .eq('doctor_id', currentUser.id)
-          .order('scheduled_at', { ascending: false })
-          .limit(20)
+          .eq("doctor_id", currentUser.id)
+          .order("scheduled_at", { ascending: false })
+          .limit(30)
 
         if (error) throw error
-        setAppointments(appointmentsData || [])
+        setAppointments(data || [])
       } catch (error) {
         console.error("Error loading data:", error)
       } finally {
         setIsLoading(false)
       }
     }
-
     loadData()
   }, [router])
 
   const handleLogout = async () => {
-    try {
-      await signOut()
-      router.push("/auth/login")
-    } catch (error) {
-      console.error("Logout failed:", error)
-    }
+    await signOut()
+    router.push("/auth/login")
   }
 
   const updateAppointmentStatus = async (appointmentId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({ status: newStatus })
-        .eq('id', appointmentId)
+    if (!user) return
+    const { error } = await supabase.from("appointments").update({ status: newStatus }).eq("id", appointmentId)
+    if (error) return
 
-      if (error) throw error
+    const { data } = await supabase
+      .from("appointments")
+      .select(`
+        *,
+        patient:profiles!appointments_patient_id_fkey(
+          id,
+          full_name,
+          email,
+          phone,
+          gender
+        )
+      `)
+      .eq("doctor_id", user.id)
+      .order("scheduled_at", { ascending: false })
+      .limit(30)
 
-      // Reload appointments
-      const { data: appointmentsData } = await supabase
-        .from('appointments')
-        .select(`
-          *,
-          patient:profiles!appointments_patient_id_fkey(
-            id,
-            full_name,
-            email,
-            phone,
-            date_of_birth,
-            gender
-          )
-        `)
-        .eq('doctor_id', user.id)
-        .order('scheduled_at', { ascending: false })
-        .limit(20)
-
-      setAppointments(appointmentsData || [])
-    } catch (error) {
-      console.error("Error updating appointment:", error)
-    }
+    setAppointments(data || [])
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "scheduled":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-      case "confirmed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "completed":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-      case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-    }
+    if (status === "confirmed") return "bg-green-100 text-green-800"
+    if (status === "scheduled") return "bg-blue-100 text-blue-800"
+    if (status === "completed") return "bg-slate-100 text-slate-800"
+    if (status === "cancelled") return "bg-red-100 text-red-800"
+    return "bg-slate-100 text-slate-800"
   }
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "video":
-        return <Video className="h-4 w-4" />
-      case "phone":
-        return <Phone className="h-4 w-4" />
-      case "in-person":
-        return <User className="h-4 w-4" />
-      default:
-        return <User className="h-4 w-4" />
-    }
+    if (type === "video") return <Video className="h-4 w-4" />
+    if (type === "phone") return <Phone className="h-4 w-4" />
+    return <User className="h-4 w-4" />
   }
 
+  const todayAppointments = useMemo(() => {
+    const today = new Date().toDateString()
+    return appointments.filter((a) => new Date(a.scheduled_at).toDateString() === today && (a.status === "scheduled" || a.status === "confirmed"))
+  }, [appointments])
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    )
+    return <main className="mx-auto w-full max-w-7xl px-4 py-8 text-slate-600">Loading dashboard...</main>
   }
 
   if (doctor && !doctor.is_verified) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
-            <CardContent className="p-8 text-center">
-              <AlertCircle className="h-16 w-16 text-yellow-600 dark:text-yellow-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-foreground mb-2">Verification Pending</h2>
-              <p className="text-muted-foreground mb-4">
-                Your doctor account is pending verification by our admin team. You will receive access once your license and credentials are verified.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                This process typically takes 24-48 hours. You will be notified via email once your account is verified.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <main className="mx-auto w-full max-w-4xl px-4 py-10">
+        <Card className="glass-panel border-yellow-200 bg-yellow-50">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-yellow-700" />
+            <p className="text-2xl font-semibold text-slate-900">Verification Pending</p>
+            <p className="mt-2 text-slate-700">Your doctor profile is under review. You will get access once verification is complete.</p>
+          </CardContent>
+        </Card>
+      </main>
     )
   }
 
-  const upcomingAppointments = appointments.filter(a => 
-    a.status === 'scheduled' || a.status === 'confirmed'
-  )
-  const todayAppointments = appointments.filter(a => {
-    const appointmentDate = new Date(a.scheduled_at)
-    const today = new Date()
-    return appointmentDate.toDateString() === today.toDateString() && 
-           (a.status === 'scheduled' || a.status === 'confirmed')
-  })
-
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Doctor Dashboard</h1>
-            <p className="text-muted-foreground">Manage your appointments and patients</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="bg-primary/10 text-primary flex items-center">
-              <Stethoscope className="h-4 w-4 mr-2" />
-              {doctor?.specialization || "Doctor"}
-            </Badge>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2">
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Doctor Dashboard</h1>
+          <p className="text-slate-600">Manage patient appointments and daily schedule.</p>
         </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-card border-border hover-lift smooth-transition">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Appointments</p>
-                  <p className="text-2xl font-bold text-foreground">{appointments.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border hover-lift smooth-transition">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Today</p>
-                  <p className="text-2xl font-bold text-foreground">{todayAppointments.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border hover-lift smooth-transition">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Upcoming</p>
-                  <p className="text-2xl font-bold text-foreground">{upcomingAppointments.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border hover-lift smooth-transition">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Patients</p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {new Set(appointments.map(a => a.patient_id)).size}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-cyan-100 text-cyan-800">
+            <Stethoscope className="mr-1 h-4 w-4" />
+            {doctor?.specialization || "Doctor"}
+          </Badge>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
-
-        {/* Appointments List */}
-        <Card className="bg-card border-border hover-lift smooth-transition">
-          <CardHeader>
-            <CardTitle className="text-card-foreground">Appointments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {appointments.length === 0 ? (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No appointments yet</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {appointments.map((appointment) => (
-                  <div key={appointment.id} className="p-4 bg-accent rounded-lg hover-lift smooth-transition">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-foreground">
-                            {appointment.patient?.full_name || "Patient"}
-                          </h3>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(appointment.scheduled_at).toLocaleDateString()}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {new Date(appointment.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {getTypeIcon(appointment.consultation_type)}
-                            {appointment.consultation_type}
-                          </div>
-                          {appointment.patient?.phone && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {appointment.patient.phone}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {(appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            Confirm
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'completed')}
-                          >
-                            Complete
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    {appointment.reason && (
-                      <div className="mt-2 p-2 bg-background rounded text-sm">
-                        <p className="font-medium text-foreground mb-1">Reason:</p>
-                        <p className="text-muted-foreground">{appointment.reason}</p>
-                      </div>
-                    )}
-                    {appointment.patient_notes && (
-                      <div className="mt-2 p-2 bg-background rounded text-sm">
-                        <p className="font-medium text-foreground mb-1">Patient Notes:</p>
-                        <p className="text-muted-foreground">{appointment.patient_notes}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
-    </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="glass-panel"><CardContent className="p-5"><p className="text-sm text-slate-500">Total Appointments</p><p className="text-3xl font-bold text-slate-900">{appointments.length}</p></CardContent></Card>
+        <Card className="glass-panel"><CardContent className="p-5"><p className="text-sm text-slate-500">Today</p><p className="text-3xl font-bold text-slate-900">{todayAppointments.length}</p></CardContent></Card>
+        <Card className="glass-panel"><CardContent className="p-5"><p className="text-sm text-slate-500">Upcoming</p><p className="text-3xl font-bold text-slate-900">{appointments.filter((a) => a.status === "scheduled" || a.status === "confirmed").length}</p></CardContent></Card>
+        <Card className="glass-panel"><CardContent className="p-5"><p className="text-sm text-slate-500">Unique Patients</p><p className="text-3xl font-bold text-slate-900">{new Set(appointments.map((a) => a.patient_id)).size}</p></CardContent></Card>
+      </div>
+
+      <Card className="glass-panel">
+        <CardHeader>
+          <CardTitle className="text-slate-900">Appointment Queue</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {appointments.length === 0 ? (
+            <p className="text-slate-600">No appointments yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {appointments.map((appointment) => (
+                <div key={appointment.id} className="rounded-xl border border-slate-200 bg-white/75 p-4">
+                  <div className="mb-2 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                    <div>
+                      <p className="font-semibold text-slate-900">{appointment.patient?.full_name || "Patient"}</p>
+                      <p className="text-sm text-slate-600">{appointment.patient?.email || "No email"}</p>
+                    </div>
+                    <Badge className={getStatusColor(appointment.status)}>{appointment.status}</Badge>
+                  </div>
+                  <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-3">
+                    <p className="inline-flex items-center gap-1"><Calendar className="h-4 w-4" />{new Date(appointment.scheduled_at).toLocaleDateString()}</p>
+                    <p className="inline-flex items-center gap-1"><Clock className="h-4 w-4" />{new Date(appointment.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    <p className="inline-flex items-center gap-1">{getTypeIcon(appointment.consultation_type)}{appointment.consultation_type}</p>
+                  </div>
+                  {appointment.reason ? <p className="mt-2 text-sm text-slate-600">Reason: {appointment.reason}</p> : null}
+
+                  {(appointment.status === "scheduled" || appointment.status === "confirmed") && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" onClick={() => updateAppointmentStatus(appointment.id, "confirmed")}>
+                        Confirm
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => updateAppointmentStatus(appointment.id, "completed")}>
+                        <CheckCircle className="mr-1 h-4 w-4" />
+                        Complete
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-600" onClick={() => updateAppointmentStatus(appointment.id, "cancelled")}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </main>
   )
 }

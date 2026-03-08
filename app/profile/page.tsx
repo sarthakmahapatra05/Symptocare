@@ -35,6 +35,7 @@ import {
   FileText,
   HelpCircle,
 } from "lucide-react"
+import { getCurrentUser, signOut } from "@/lib/auth"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -49,14 +50,14 @@ export default function ProfilePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    // Simulate authentication check
     const checkAuth = async () => {
-      // In real app, check with Supabase or your auth provider
-      const token = localStorage.getItem("auth_token")
-      if (!token) {
+      const user = await getCurrentUser()
+      if (!user) {
+        setIsLoading(false)
         router.push("/auth/login")
         return
       }
+
       setIsAuthenticated(true)
       setIsLoading(false)
     }
@@ -868,8 +869,8 @@ export default function ProfilePage() {
           <Button
             variant="outline"
             className="w-full justify-start text-red-600 hover:text-red-700 bg-transparent"
-            onClick={() => {
-              localStorage.removeItem("auth_token")
+            onClick={async () => {
+              await signOut()
               router.push("/auth/login")
             }}
           >
