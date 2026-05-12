@@ -1,231 +1,386 @@
-# Symptocare 🏥
-<img src="./logosymptocare.png" alt="Header Banner" width="100%" />
+<div align="center">
 
-[![HackOdisha5.0](https://img.shields.io/badge/Hackathon-HackOdisha5.0-blue)](https://hackodisha.com)
-[![Team Alpha](https://img.shields.io/badge/Team-Alpha-green)](https://github.com/team-alpha)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://docker.com)
-[![Vercel](https://img.shields.io/badge/Vercel-Ready-black?logo=vercel)](https://vercel.com)
+# 🏥 Symptocare
 
-A comprehensive healthcare platform built during **HackOdisha5.0** hackathon by **Team Alpha**. Symptocare empowers users with AI-driven symptom analysis, personalized health insights, and seamless doctor-patient connectivity.
+<img src="./logosymptocare.png" alt="Symptocare Banner" width="100%" />
 
-## 🌟 Features
+<br/>
 
-- **AI-Powered Symptom Analysis**: Intelligent questionnaire system for conditions like diabetes, hypertension, and asthma
-- **Doctor-Patient Portal**: Secure appointment booking and consultation management
-- **Personalized Dashboard**: Health tracking and progress monitoring
-- **Fitgram Social**: Community-driven wellness sharing
-- **Multi-Role Authentication**: Support for patients, doctors, and administrators
-- **Real-time Chat**: Instant communication between users and healthcare providers
-- **Docker Containerization**: Easy deployment and scaling
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&size=32&pause=1000&color=00B894&center=true&vCenter=true&width=850&lines=AI-Powered+Healthcare+Platform;HackOdisha5.0+Project;Doctor+%7C+Patient+%7C+AI+Ecosystem" />
+</p>
 
-## 👥 Team Alpha
+<br/>
 
-| Name | Role | GitHub |
-|------|------|--------|
-| **Shreya Sahu** | Frontend Developer | [@shreyasahu](https://github.com/shreyaexo1) |
-| **Ranjana Pradhan** | Frontend Developer & PPT Presentation | [@ranjanapradhan](https://github.com/RanjanaPradhan) |
-| **Adyasha Panda** | AI Integration & Backend Developer | [@adyashapanda](https://github.com/adyasha-panda-stack) |
-| **Sarthak Mahapatra** | Database Manager & Docker Integration | [@sarthakmahapatra](https://github.com/sarthakmahapatra05) |
-| **Aditi Pandey** | Team Management & Deployment | [@aditipandey](https://github.com/ADITI02-DEV) |
+<p align="center">
+  <img src="https://img.shields.io/badge/Hackathon-HackOdisha5.0-1E90FF?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Team-Alpha-00C853?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js-black?style=for-the-badge&logo=next.js" />
+  <img src="https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/Containerized-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel" />
+</p>
 
-## 🚀 Quick Start
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=nextjs,react,typescript,tailwind,supabase,python,flask,docker,git,vscode" />
+</p>
 
-### Prerequisites
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=sarthakmahapatra05&label=Project+Views&color=00b894&style=for-the-badge" />
+</p>
 
-- Node.js 18+
-- pnpm (recommended) or npm
-- Python 3.8+ (for ML service)
-- Docker & Docker Compose (optional, for containerized development)
-
-### Local Development
-
-#### Option 1: Using Docker (Recommended)
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd HackOdisha5.0
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp .env.local.example .env.local
-   # Edit .env.local with your Supabase credentials
-   ```
-
-3. **Start with Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
-
-4. **Access the application**
-   - Frontend: http://localhost:3000
-   - ML Service: http://localhost:5000
-   - Supabase: http://localhost:5432
-
-#### Option 2: Traditional Development
-
-1. **Install dependencies**
-   ```bash
-   pnpm install
-   # or
-   npm install
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp .env.local.example .env.local
-   # Edit .env.local with your Supabase credentials
-   ```
-
-3. **Start development server**
-   ```bash
-   pnpm dev
-   # or
-   npm run dev
-   ```
-
-4. **Access the application**
-   - Frontend: http://localhost:3000
-
-## 🐳 Docker Commands
-
-### Development
-```bash
-# Start all services
-docker-compose up
-
-# Start in background
-docker-compose up -d
-
-# Build and start
-docker-compose up --build
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f app
-```
-
-### Production Build
-```bash
-# Build production image
-docker build -t symptocare .
-
-# Run production container
-docker run -p 3000:3000 symptocare
-```
-
-## 📁 Project Structure
-
-```
-HackOdisha5.0/
-├── app/                    # Next.js app directory
-│   ├── auth/              # Authentication pages
-│   ├── dashboard/         # Dashboard pages
-│   ├── onboarding/        # Onboarding flow
-│   ├── profile/           # User profile
-│   ├── fitgram/           # Social features
-│   ├── chat/              # Real-time chat
-│   ├── appointments/      # Appointment management
-│   └── questionnaire/      # AI symptom analysis
-├── components/            # Reusable UI components
-├── lib/                   # Utility functions
-│   ├── auth.ts           # Authentication helpers
-│   ├── supabase.ts       # Supabase client
-│   └── questionnaire-questions.ts  # Predefined questions
-├── ml-service/           # ML service (Python Flask)
-│   ├── app.py           # Flask API
-│   ├── models/          # ML models
-│   ├── train_models.py  # Training script
-│   └── requirements.txt # Python dependencies
-├── app/api/             # Next.js API routes
-│   ├── analyze-symptoms/  # Symptom analysis endpoint
-│   └── recommend-doctor/ # Doctor recommendation endpoint
-├── public/               # Static assets
-├── styles/               # Global styles
-├── Dockerfile           # Docker configuration
-├── docker-compose.yml   # Docker Compose setup
-└── .dockerignore       # Docker ignore file
-```
-
-## 🔧 Environment Variables
-
-Create a `.env.local` file with the following variables:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-ML_SERVICE_URL=http://localhost:5000
-```
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14, React, TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **AI Integration**: Custom ML models for symptom analysis (see [ML_IMPLEMENTATION.md](ML_IMPLEMENTATION.md))
-- **ML Service**: Python Flask API with scikit-learn models
-- **Deployment**: Docker, Vercel
-- **Package Manager**: pnpm
-
-## 📝 Available Scripts
-
-```bash
-# Development
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
-
-# ML Service
-cd ml-service
-python train_models.py  # Train ML models
-python app.py           # Start ML service
-
-# Database
-pnpm db:push      # Push schema changes to Supabase
-pnpm db:studio    # Open Supabase Studio
-```
-
-## 🤖 ML Service Setup
-
-The application uses custom ML models for symptom analysis instead of external APIs. See [SETUP_ML.md](SETUP_ML.md) for detailed setup instructions.
-
-Quick setup:
-1. Install Python dependencies: `cd ml-service && pip install -r requirements.txt`
-2. Train models: `python train_models.py` (optional - uses synthetic data if Kaggle not configured)
-3. Start ML service: `python app.py`
-4. Configure Next.js: Add `ML_SERVICE_URL=http://localhost:5000` to `.env.local`
-
-For Kaggle dataset integration, see [SETUP_ML.md](SETUP_ML.md).
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Test with Docker: `docker-compose up --build`
-5. Commit your changes (`git commit -m 'Add some amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **HackOdisha5.0** organizers for the amazing hackathon experience
-- **Team Alpha** for the collaborative effort and dedication
-- **Supabase** for the excellent backend-as-a-service platform
-- **Next.js** community for the powerful React framework
+</div>
 
 ---
 
-**Built with ❤️ by Team Alpha during HackOdisha5.0**
+# ✨ About The Project
+
+**Symptocare** is a modern AI-powered healthcare ecosystem developed during **HackOdisha5.0** by **Team Alpha**.
+
+The platform bridges the gap between patients and healthcare providers through intelligent symptom analysis, personalized healthcare recommendations, real-time communication, and doctor-patient connectivity.
+
+Symptocare combines the power of:
+
+- 🧠 Artificial Intelligence
+- 🏥 Healthcare Management
+- 💬 Real-time Communication
+- 📊 Personalized Health Tracking
+- 🌐 Modern Full-Stack Web Development
+
+---
+
+# 🚀 Features
+
+🧠 AI-powered symptom analysis  
+🏥 Doctor-patient appointment management  
+📊 Personalized healthcare dashboard  
+💬 Real-time chat system  
+🌐 Multi-role authentication system  
+📱 Mobile responsive UI  
+👨‍⚕️ Doctor recommendation engine  
+📈 Health tracking and monitoring  
+🐳 Dockerized full-stack deployment  
+🧑‍🤝‍🧑 Fitgram social wellness community  
+
+---
+
+# 🛠️ Tech Stack
+
+| Category | Technologies |
+|---|---|
+| **Frontend** | Next.js 14, React, TypeScript |
+| **Styling** | Tailwind CSS, shadcn/ui |
+| **Backend** | Next.js API Routes, Flask |
+| **Database** | Supabase (PostgreSQL) |
+| **Authentication** | Supabase Auth |
+| **Machine Learning** | Scikit-learn, Python |
+| **Deployment** | Docker, Vercel |
+| **Package Manager** | pnpm |
+
+---
+
+# 👥 Team Alpha
+
+| Member | Role | GitHub |
+|---|---|---|
+| **Shreya Sahu** | Frontend Developer | [@shreyasahu](https://github.com/shreyaexo1) |
+| **Ranjana Pradhan** | Frontend Developer & PPT Presentation | [@ranjanapradhan](https://github.com/RanjanaPradhan) |
+| **Adyasha Panda** | AI Integration & Backend Developer | [@adyashapanda](https://github.com/adyasha-panda-stack) |
+| **Sarthak Mahapatra** | Database Manager & Docker Integration | [@sarthakmahapatra05](https://github.com/sarthakmahapatra05) |
+| **Aditi Pandey** | Team Management & Deployment | [@ADITI02-DEV](https://github.com/ADITI02-DEV) |
+
+---
+
+# 🏗️ Project Structure
+
+```bash
+HackOdisha5.0/
+│
+├── app/
+│   ├── auth/
+│   ├── dashboard/
+│   ├── onboarding/
+│   ├── profile/
+│   ├── fitgram/
+│   ├── chat/
+│   ├── appointments/
+│   └── questionnaire/
+│
+├── components/
+│
+├── lib/
+│   ├── auth.ts
+│   ├── supabase.ts
+│   └── questionnaire-questions.ts
+│
+├── ml-service/
+│   ├── app.py
+│   ├── models/
+│   ├── train_models.py
+│   └── requirements.txt
+│
+├── app/api/
+│   ├── analyze-symptoms/
+│   └── recommend-doctor/
+│
+├── public/
+├── styles/
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+# 🚀 Quick Start
+
+# 🔹 Clone Repository
+
+```bash
+git clone <repository-url>
+
+cd HackOdisha5.0
+```
+
+---
+
+# 🔹 Install Dependencies
+
+```bash
+pnpm install
+```
+
+or
+
+```bash
+npm install
+```
+
+---
+
+# 🔹 Configure Environment Variables
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+ML_SERVICE_URL=http://localhost:5000
+```
+
+---
+
+# 🔹 Start Development Server
+
+```bash
+pnpm dev
+```
+
+or
+
+```bash
+npm run dev
+```
+
+Frontend runs on:
+
+```bash
+http://localhost:3000
+```
+
+---
+
+# 🐳 Docker Setup
+
+# 🔹 Start All Services
+
+```bash
+docker-compose up
+```
+
+---
+
+# 🔹 Start In Background
+
+```bash
+docker-compose up -d
+```
+
+---
+
+# 🔹 Build And Start
+
+```bash
+docker-compose up --build
+```
+
+---
+
+# 🔹 Stop Services
+
+```bash
+docker-compose down
+```
+
+---
+
+# 🔹 View Logs
+
+```bash
+docker-compose logs -f app
+```
+
+---
+
+# 🧠 ML Service Setup
+
+The application uses custom machine learning models for AI-powered symptom analysis.
+
+---
+
+# 🔹 Install Python Dependencies
+
+```bash
+cd ml-service
+
+pip install -r requirements.txt
+```
+
+---
+
+# 🔹 Train Models
+
+```bash
+python train_models.py
+```
+
+---
+
+# 🔹 Start ML Service
+
+```bash
+python app.py
+```
+
+ML Service runs on:
+
+```bash
+http://localhost:5000
+```
+
+---
+
+# 📊 Core Modules
+
+| Module | Description |
+|---|---|
+| 🧠 Symptom Analysis | AI-based disease prediction system |
+| 👨‍⚕️ Doctor Portal | Appointment & consultation management |
+| 📱 Dashboard | Personalized health monitoring |
+| 💬 Real-time Chat | Doctor-patient communication |
+| 🧑‍🤝‍🧑 Fitgram | Social wellness platform |
+| 🔐 Authentication | Secure multi-role login system |
+
+---
+
+# 🌐 Deployment
+
+## 🚀 Recommended Platforms
+
+| Service | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend / ML Service | Docker / VPS |
+| Database | Supabase |
+
+---
+
+# 📝 Available Scripts
+
+```bash
+# Development
+pnpm dev
+
+# Build Production
+pnpm build
+
+# Start Production
+pnpm start
+
+# Lint
+pnpm lint
+
+# Train ML Models
+python train_models.py
+
+# Start ML API
+python app.py
+```
+
+---
+
+# 🔧 Troubleshooting
+
+## Docker Build Issues
+
+```bash
+docker-compose build --no-cache
+```
+
+---
+
+## Dependency Installation Issues
+
+```bash
+pnpm install
+```
+
+---
+
+## ML Service Issues
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 🌟 Future Improvements
+
+- 📱 Mobile application
+- 🧠 Advanced deep learning models
+- 🩺 Telemedicine video consultation
+- ☁️ Cloud-native infrastructure
+- 📊 Advanced analytics dashboard
+- 🔔 Smart health notifications
+- 🌍 Multi-language support
+
+---
+
+# 🙏 Acknowledgments
+
+- ❤️ HackOdisha5.0 organizers
+- 👥 Team Alpha members
+- ⚡ Supabase platform
+- ▲ Next.js community
+- 🐳 Docker ecosystem
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+<div align="center">
+
+# ⭐ Built With ❤️ By Team Alpha During HackOdisha5.0 ⭐
+
+### Empowering Healthcare Through AI & Innovation
+
+</div>
