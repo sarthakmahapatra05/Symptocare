@@ -2,7 +2,7 @@
 
 # 🏥 Symptocare
 
-<img src="./logosymptocare.png" alt="Symptocare Banner" width="100%" />
+<img src="./logosymptocare.png" alt="Symptocare Banner" width="50%" />
 
 <br/>
 
